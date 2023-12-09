@@ -2,6 +2,7 @@
  
 import cv2
 import time
+import libcamera
 from picamera2 import Picamera2
 from initialize_tf import height, width
 
@@ -10,7 +11,8 @@ def initialize_picamera():
     cv2.startWindowThread()
      
     picam2 = Picamera2()
-    config = picam2.create_preview_configuration(lores={"size": (301, 301)})
+    config = picam2.create_preview_configuration(lores={"size": (width, height)})
+    config["transform"] = libcamera.Transform(hflip=1, vflip=1)
     picam2.configure(config)
     picam2.start()
     
@@ -18,7 +20,8 @@ def initialize_picamera():
     
     
 def get_frame(picam2):
-    return cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
+    frame = cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
+    return frame[:,:width]
 
 
 if __name__ == '__main__':

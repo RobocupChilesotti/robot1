@@ -4,8 +4,10 @@ import tflite_runtime.interpreter as tflite
 
 
 # Define the variables here
-model_file = '/home/pi/Desktop/robot/tflite/tflite2/Sample_TFLite_model/detect.tflite'
-label_file = '/home/pi/Desktop/robot/tflite/tflite2/Sample_TFLite_model/labelmap.txt'
+#model_file = '/home/pi/Desktop/robot/tflite/tflite2/Sample_TFLite_model/detect.tflite'
+#label_file = '/home/pi/Desktop/robot/tflite/tflite2/Sample_TFLite_model/labelmap.txt'
+model_file = '/home/pi/Desktop/robot/tflite/tflite2/custom_model_lite/detect_quant.tflite'
+label_file = '/home/pi/Desktop/robot/tflite/tflite2/custom_model_lite/labelmap.txt'
 #model_file = '/home/pi/Desktop/robot/tflite/tflite2/sartore/razzismo.tflite'
 #label_file = '/home/pi/Desktop/robot/tflite/tflite2/sartore/labels_map.txt'
 num_threads = None
