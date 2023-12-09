@@ -10,14 +10,15 @@ def initialize_picamera():
     cv2.startWindowThread()
      
     picam2 = Picamera2()
-    picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (width, height)}))
+    config = picam2.create_preview_configuration(lores={"size": (301, 301)})
+    picam2.configure(config)
     picam2.start()
     
     return picam2
     
     
 def get_frame(picam2):
-    return cv2.cvtColor(picam2.capture_array(), cv2.COLOR_RGB2BGR)    
+    return cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
 
 
 if __name__ == '__main__':
