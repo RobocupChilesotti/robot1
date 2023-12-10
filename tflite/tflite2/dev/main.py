@@ -8,9 +8,9 @@ import cv2
 import tensorflow as tf
 
 
-from acquire_img import initialize_stream, get_img
+#from acquire_img import initialize_stream, get_img
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
-from hardware_ctrl import initialize_ser_com, turn_x_deg, set_turn, stop
+from hardware_ctrl import turn_x_deg, set_turn, stop
 from utils import draw_bbox
 from aquire_stream import initialize_picamera, get_frame
 
@@ -33,9 +33,6 @@ lost_frames_adj_increment = 15
 no_near_ball_count_thresh = 5
 
 turn_speed = 100
-
-
-#cap = initialize_stream()
 
 
 # (object_name, score, y_min, x_min, y_max, x_max)
