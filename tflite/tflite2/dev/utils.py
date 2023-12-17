@@ -20,3 +20,7 @@ def draw_bbox(frame, object_name='', score=0, y_min=0, x_min=0, y_max=0, x_max=0
         cy = int((y_min + y_max) / 2)
         # Draw the center point
         cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
+
+
+def map_int_from_zero(x, out_min, out_max):
+    return int(x * (out_max - out_min) // out_min)

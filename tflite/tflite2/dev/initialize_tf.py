@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-import tflite_runtime.interpreter as tflite
+#import tflite_runtime.interpreter as tflite
 
 
 # Define the variables here
@@ -24,7 +24,7 @@ if labels[0] == '???':
     del (labels[0])
 
 # Load TFLite model and allocate tensors
-'''
+
 interpreter = tf.lite.Interpreter(
     model_path=model_file,
     num_threads=num_threads)
@@ -34,7 +34,7 @@ interpreter = tf.lite.Interpreter(
     model_path=model_file,
     num_threads=num_threads,
     experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
-
+'''
 
 interpreter.allocate_tensors()
 

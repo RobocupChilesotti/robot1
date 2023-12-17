@@ -7,11 +7,16 @@ from picamera2 import Picamera2
 from initialize_tf import height, width
 
 
+
+
+
+
+
 def initialize_picamera():
     cv2.startWindowThread()
      
     picam2 = Picamera2()
-    config = picam2.create_preview_configuration(lores={"size": (width, height)})
+    config = picam2.create_preview_configuration(lores={"size": (width, height)}, buffer_count=1)
     config["transform"] = libcamera.Transform(hflip=1, vflip=1)
     picam2.configure(config)
     picam2.start()

@@ -19,7 +19,7 @@ picam2 = initialize_picamera()
 
 
 # Global vars
-conf_thresh = .65
+conf_thresh = 0
 
 display = True
 
@@ -76,6 +76,10 @@ def inf(frame):
     return balls
 
 
+
+# offset entrata
+
+
 # (object_name, score, y_min, x_min, y_max, x_max)
 def find_ball():
     balls_2d = []
@@ -91,6 +95,7 @@ def find_ball():
 
         # Search for balls
         balls_2d = inf(frame)
+        print('inf')
 
         if not balls_2d:
             # Non-multithreaded blocking instruction
@@ -99,16 +104,26 @@ def find_ball():
         end_time = time.time()
         print(f'fps = {1 / (end_time - start_time)}')
 
+
+
     max_delta = 0
     max_index = 0
 
     for index, ball in enumerate(balls_2d):
         # (object_name, score, y_min, x_min, y_max, x_max)
 
+        ball_type, score, y_min, x_min, y_max, x_max = ball
+
+        draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+
         ball_width = ball[5] - ball[3]
 
         if ball_width > max_delta:
             max_index = index
+
+        if display:
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(0)
 
     # (object_name, score, y_min, x_min, y_max, x_max)
     return balls_2d[max_index]
@@ -192,19 +207,43 @@ def reach_ball(b_to_reach):
 
 
 
-            
+def free_run_fps():
+    while True: 
+        start_time = time.time()
 
+        frame = get_frame(picam2)
 
-        
+        balls_2d = inf(frame)
+
+        for index, ball in enumerate(balls_2d):
+            # (object_name, score, y_min, x_min, y_max, x_max)
+
+            ball_type, score, y_min, x_min, y_max, x_max = ball
+
+            draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+
+        cv2.imshow('Frame', frame)
+        cv2.waitKey(1)
+
+        end_time = time.time()
+        print(f'fps = {1 / (end_time - start_time)}')
+
 
 
 
 def main():    
     #initialize_ser_com()
     biggest_ball = find_ball()
+    
+    if display:
+        print("Found!")
+    
     aligned_ball = initial_alignment(biggest_ball)
+    '''
     reach_ball(aligned_ball)
+    '''
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    free_run_fps()
