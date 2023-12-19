@@ -12,14 +12,11 @@ import tensorflow as tf
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
 from hardware_ctrl import turn_x_deg, set_turn, stop
 from utils import draw_bbox
-from aquire_stream import initialize_picamera, get_frame
-
-
-picam2 = initialize_picamera()
+from aquire_stream_1_0 import get_frame
 
 
 # Global vars
-conf_thresh = 0
+conf_thresh = 1
 
 display = True
 
@@ -87,7 +84,7 @@ def find_ball():
         start_time = time.time()
         
         # Get the frame
-        frame = get_frame(picam2)
+        frame = get_frame()
 
         if display:
             cv2.imshow('Frame', frame)
@@ -150,7 +147,7 @@ def initial_alignment(b_to_align):
     # Continues to turn until it is centered
     while cx < width / 2 * (1 - allign_straight_perc) or cx > width / 2 * (1 + allign_straight_perc):
         # Get the frame
-        frame = get_frame(picam2)
+        frame = get_frame()
 
         # Search for balls
         balls_2d = inf(frame)
@@ -211,7 +208,7 @@ def free_run_fps():
     while True: 
         start_time = time.time()
 
-        frame = get_frame(picam2)
+        frame = get_frame()
 
         balls_2d = inf(frame)
 
@@ -222,8 +219,9 @@ def free_run_fps():
 
             draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
 
-        cv2.imshow('Frame', frame)
-        cv2.waitKey(1)
+        if display:
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
 
         end_time = time.time()
         print(f'fps = {1 / (end_time - start_time)}')

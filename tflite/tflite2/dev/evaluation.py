@@ -14,7 +14,7 @@ from aquire_stream import initialize_picamera, get_frame
 
 
 # Global vars
-conf_thresh = 0
+conf_thresh = 0.65
 
 
 picam2 = initialize_picamera()
@@ -96,6 +96,7 @@ def test_acquisition():
     while True:
         start_time = time.time()
 
+        '''
         if (start_time - start_count) >= 8:
             print('-2s!')
 
@@ -103,6 +104,9 @@ def test_acquisition():
             time.sleep(3)
 
             start_count = time.time()
+        '''
+
+        time.sleep(0.05)            
 
         frame = get_frame(picam2)
         
@@ -114,5 +118,5 @@ def test_acquisition():
 
 
 if __name__ == '__main__':
-    #test_acquisition()
-    free_run_fps()
+    test_acquisition()
+    #free_run_fps()
