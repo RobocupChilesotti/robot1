@@ -5,8 +5,8 @@ from initialize_tf import width
 from utils import map_int_from_zero, map_for_motors
 
 
-v_min = 20
-v_set = 120
+v_min = 1
+v_set = 60
 
 delta_v = v_set - v_min
 
@@ -80,6 +80,6 @@ def set_turn(direction, speed):
 def stop():
     # Stop motors
     #Motor:FRight:FLeft:BLeft:BRight
-    ser.write("M:255:255:255:255\n".encode('utf-8'))
+    ser.write("M:0:0:0:0\n".encode('utf-8'))
 
     return False
