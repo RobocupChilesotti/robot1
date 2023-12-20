@@ -2,7 +2,16 @@ import logging
 import serial
 import time
 from initialize_tf import width
-from utils import map_int_from_zero
+from utils import map_int_from_zero, map_for_motors
+
+
+v_min = 20
+v_set = 120
+
+delta_v = v_set - v_min
+
+conv = delta_v / (width / 4)
+
 
 
 # Multithread what's needed
@@ -13,6 +22,11 @@ time.sleep(3)
 ser.reset_input_buffer()
 
 logging.info("Serial communication started")
+
+
+def read_in():
+    line = ser.readline().decode('utf-8').rstrip()
+    print(f'IN from Arduino: {line}')
 
 
 # NO-MULTITHREADING!
@@ -43,8 +57,15 @@ def turn_x_deg(turn_deg, direction, speed):
     return True
 
 
-def mv_to(x_pos):
+def ms_speed(x_pos):
     # 0 <= x_pos >= width(320)
+
+    front_left, front_right, back_left, back_right = map_for_motors(x_pos, width, conv, v_min, v_set)
+
+    # Motor:FRight:FLeft:BLeft:BRight
+    ser.write(f'M:{front_right}:{front_left}:{back_left}:{back_right}\n'.encode('utf-8'))
+    print(f'M:{front_right}:{front_left}:{back_left}:{back_right}\n')
+
     return False
     
 
@@ -58,12 +79,7 @@ def set_turn(direction, speed):
 
 def stop():
     # Stop motors
-
-    string = "M:255:255:255:255\n" 
-
-    ser.write(string.encode('utf-8'))		#Motor:FRight:FLeft:BLeft:BRight
-    line = ser.readline().decode('utf-8').rstrip()
-    print(line)
-    time.sleep(1)
+    #Motor:FRight:FLeft:BLeft:BRight
+    ser.write("M:255:255:255:255\n".encode('utf-8'))
 
     return False

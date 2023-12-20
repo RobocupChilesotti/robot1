@@ -120,7 +120,7 @@ def find_ball():
 
         if display:
             cv2.imshow('Frame', frame)
-            cv2.waitKey(0)
+            cv2.waitKey(1)
 
     # (object_name, score, y_min, x_min, y_max, x_max)
     return balls_2d[max_index]
@@ -203,32 +203,6 @@ def reach_ball(b_to_reach):
     return
 
 
-
-def free_run_fps():
-    while True: 
-        start_time = time.time()
-
-        frame = get_frame()
-
-        balls_2d = inf(frame)
-
-        for index, ball in enumerate(balls_2d):
-            # (object_name, score, y_min, x_min, y_max, x_max)
-
-            ball_type, score, y_min, x_min, y_max, x_max = ball
-
-            draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
-
-        if display:
-            cv2.imshow('Frame', frame)
-            cv2.waitKey(1)
-
-        end_time = time.time()
-        print(f'fps = {1 / (end_time - start_time)}')
-
-
-
-
 def main():    
     #initialize_ser_com()
     biggest_ball = find_ball()
@@ -243,5 +217,4 @@ def main():
 
 
 if __name__ == '__main__':
-    #main()
-    free_run_fps()
+    main()

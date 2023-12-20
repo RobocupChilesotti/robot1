@@ -10,14 +10,14 @@ from vcgencmd import Vcgencmd
 #from acquire_img import initialize_stream, get_img
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
 from utils import draw_bbox
-from aquire_stream import initialize_picamera, get_frame
+from aquire_stream_1_0 import get_frame
+from hardware_ctrl import ms_speed, stop, read_in
 
 
 # Global vars
 conf_thresh = 0.65
 
-
-picam2 = initialize_picamera()
+display = True
 
 
 vcgm = Vcgencmd()
@@ -64,11 +64,59 @@ def inf(frame):
     return balls
 
 
+def find_ball():
+    balls_2d = []
+    if not balls_2d:
+        start_time = time.time()
+
+        stop()
+        
+        # Get the frame
+        frame = get_frame()
+
+        if display:
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
+
+        # Search for balls
+        balls_2d = inf(frame)
+        print('inf')
+            
+        end_time = time.time()
+        print(f'fps = {1 / (end_time - start_time)}')
+
+        return False
+
+    else:
+
+        max_delta = 0
+        max_index = 0
+
+        for index, ball in enumerate(balls_2d):
+            # (object_name, score, y_min, x_min, y_max, x_max)
+
+            ball_type, score, y_min, x_min, y_max, x_max = ball
+
+            draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+
+            ball_width = ball[5] - ball[3]
+
+            if ball_width > max_delta:
+                max_index = index
+
+            if display:
+                cv2.imshow('Frame', frame)
+                cv2.waitKey(1)
+
+        # (object_name, score, y_min, x_min, y_max, x_max)
+        return balls_2d[max_index]
+
+
 def free_run_fps():
     while True: 
         start_time = time.time()
 
-        frame = get_frame(picam2)
+        frame = get_frame()
 
         balls_2d = inf(frame)
 
@@ -108,7 +156,7 @@ def test_acquisition():
 
         time.sleep(0.05)            
 
-        frame = get_frame(picam2)
+        frame = get_frame()
         
         cv2.imshow('Frame', frame)
         cv2.waitKey(1)
@@ -117,6 +165,48 @@ def test_acquisition():
         print(f'fps = {1 / (end_time - start_time)}')
 
 
+def motors_test():
+    while True:
+        start_time = time.time()
+
+        frame = get_frame()
+
+        balls = inf(frame)
+
+        if not balls:
+            stop()
+        else:
+            max_delta = 0
+            max_index = 0
+
+            for index, ball in enumerate(balls):
+                # (object_name, score, y_min, x_min, y_max, x_max)
+
+                ball_type, score, y_min, x_min, y_max, x_max = ball
+
+                draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+
+                ball_width = ball[5] - ball[3]
+
+                if ball_width > max_delta:
+                    max_index = index
+
+            ball_type, score, y_min, x_min, y_max, x_max = balls[max_index]
+
+            x_pos = (x_max + x_min) / 2
+
+            ms_speed(x_pos)
+        
+        read_in()
+
+        cv2.imshow('Frame', frame)
+        cv2.waitKey(1)
+
+        end_time = time.time()
+        print(f'fps = {1 / (end_time - start_time)}')
+
+
 if __name__ == '__main__':
-    test_acquisition()
+    #test_acquisition()
     #free_run_fps()
+    motors_test()
