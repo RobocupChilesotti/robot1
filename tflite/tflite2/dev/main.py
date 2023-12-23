@@ -10,7 +10,7 @@ import tensorflow as tf
 
 #from acquire_img import initialize_stream, get_img
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
-from hardware_ctrl import turn_x_deg, set_turn, stop
+from hardware_ctrl import ms_speed, stop
 from utils import draw_bbox
 from aquire_stream_1_0 import get_frame
 
@@ -80,27 +80,33 @@ def inf(frame):
 # (object_name, score, y_min, x_min, y_max, x_max)
 def find_ball():
     balls_2d = []
+
     while not balls_2d:
         start_time = time.time()
         
         # Get the frame
         frame = get_frame()
 
-        if display:
-            cv2.imshow('Frame', frame)
-            cv2.waitKey(1)
-
         # Search for balls
         balls_2d = inf(frame)
         print('inf')
 
-        if not balls_2d:
-            # Non-multithreaded blocking instruction
-            turned = turn_x_deg(5, 'r', turn_speed)
+        if display:
+            for ball in balls_2d:
+                ball_type, score, y_min, x_min, y_max, x_max = ball
+
+                draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
+
+        # Start turning as if x_pos was 290 px
+        ms_speed(320)
             
         end_time = time.time()
         print(f'fps = {1 / (end_time - start_time)}')
 
+    stop()
 
 
     max_delta = 0
@@ -137,10 +143,10 @@ def initial_alignment(b_to_align):
     # Check whether to turn right or left
     if cx < width * (1 - allign_straight_perc):
         # Ball on the left, TURN LEFT
-        set_turn('l', turn_speed)
+        ms_speed(30)
     else:
         # Ball on the left, TURN LEFT
-        set_turn('r', turn_speed)
+        ms_speed(290)
 
     lost_frames_adj = 0
 

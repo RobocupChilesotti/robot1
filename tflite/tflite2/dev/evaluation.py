@@ -64,54 +64,6 @@ def inf(frame):
     return balls
 
 
-def find_ball():
-    balls_2d = []
-    if not balls_2d:
-        start_time = time.time()
-
-        stop()
-        
-        # Get the frame
-        frame = get_frame()
-
-        if display:
-            cv2.imshow('Frame', frame)
-            cv2.waitKey(1)
-
-        # Search for balls
-        balls_2d = inf(frame)
-        print('inf')
-            
-        end_time = time.time()
-        print(f'fps = {1 / (end_time - start_time)}')
-
-        return False
-
-    else:
-
-        max_delta = 0
-        max_index = 0
-
-        for index, ball in enumerate(balls_2d):
-            # (object_name, score, y_min, x_min, y_max, x_max)
-
-            ball_type, score, y_min, x_min, y_max, x_max = ball
-
-            draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
-
-            ball_width = ball[5] - ball[3]
-
-            if ball_width > max_delta:
-                max_index = index
-
-            if display:
-                cv2.imshow('Frame', frame)
-                cv2.waitKey(1)
-
-        # (object_name, score, y_min, x_min, y_max, x_max)
-        return balls_2d[max_index]
-
-
 def free_run_fps():
     while True: 
         start_time = time.time()
