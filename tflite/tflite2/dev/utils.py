@@ -51,3 +51,21 @@ def map_for_motors(x_pos, range, conv, v_min, v_set):
     back_right = front_right
 
     return int(front_left), int(front_right), int(back_left), int(back_right)
+
+
+def find_biggest(balls):
+    max_width = 0
+    max_index = 0
+
+    for index, ball in enumerate(balls):
+        # (object_name, score, y_min, x_min, y_max, x_max)
+
+        ball_type, score, y_min, x_min, y_max, x_max = ball
+
+        ball_width = ball[5] - ball[3]
+
+        if ball_width > max_width:
+            max_index = index
+            max_width = width
+
+    return balls[max_index]

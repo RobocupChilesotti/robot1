@@ -8,7 +8,7 @@ from vcgencmd import Vcgencmd
 
 
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
-from utils import draw_bbox
+from utils import draw_bbox, find_biggest
 from aquire_stream_1_0 import get_frame
 from hardware_ctrl import ms_speed, stop, read_in
 
@@ -61,47 +61,75 @@ def inf(frame):
     return balls
 
 
-def find_balls():
-    while True:
-        start_time = time.time()
+def get_ball():
+    start_fps = time.time()
 
-        frame = get_frame()
+    frame = get_frame()
 
-        balls = inf(frame)
+    balls = inf(frame)
 
-        if not balls:
-            stop()
-            print('no balls')
-        else:
-            max_delta = 0
-            max_index = 0
+    if balls:
+        stop()
 
-            for index, ball in enumerate(balls):
-                # (object_name, score, y_min, x_min, y_max, x_max)
-
+        if display:
+            for ball in balls:
                 ball_type, score, y_min, x_min, y_max, x_max = ball
-
                 draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
 
-                ball_width = ball[5] - ball[3]
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
 
-                if ball_width > max_delta:
-                    max_index = index
+        stop_fps = time.time()
+        print(f'fps = {1 / (stop_fps - start_fps)}')
+        print('Found ball(s)')
 
-            ball_type, score, y_min, x_min, y_max, x_max = balls[max_index]
+        return find_biggest(balls)
+    
+    else:
+        if display:
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
 
-            x_pos = (x_max + x_min) / 2
+        stop_fps = time.time()
+        print(f'fps = {1 / (stop_fps - start_fps)}')
+        print('Ball not found')
 
-            ms_speed(x_pos)
+        return False
+
+
+def find_balls():
+    ball = get_ball()
+    if ball:
+        print('Found ball(s)')
+        return ball
+
+    print('Ball not found')
+
+    start_turn = time.time()
+    cur_time = start_turn
+    while True:
+        # Turn clockwise for .5s
+        while (cur_time - start_turn) < .5:
+            ms_speed(250)
+
+            ball = get_ball()
+            if ball:
+                return ball
         
-        read_in()
+            cur_time = time.time()
+            start_stop = cur_time
 
-        cv2.imshow('Frame', frame)
-        cv2.waitKey(1)
+        # Stop and wait for 2s for the camera to arrange
+        stop()
 
-        end_time = time.time()
-        print(f'fps = {1 / (end_time - start_time)}')
+        while (cur_time - start_stop) < 2:
+            ball = get_ball()
+            if ball:
+                return ball
+        
+            cur_time = time.time()
+            start_turn = cur_time
 
 
 if __name__ == '__main__':
-    find_balls()
+    ball = find_balls()
