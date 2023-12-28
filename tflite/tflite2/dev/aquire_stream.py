@@ -28,7 +28,7 @@ def initialize_picamera():
     config = picam2.create_preview_configuration(lores={"size": (width, height)}, buffer_count=1)
     #config = picam2.create_preview_configuration(main={"size": (width, height)},
     #                                             lores={"size": lowresSize, "format": "YUV420"})
-    config["transform"] = libcamera.Transform(hflip=1, vflip=1)
+    #config["transform"] = libcamera.Transform(hflip=1, vflip=1)
     picam2.configure(config)
 
     #picam2.set_controls({"FrameRate": 40})
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     while True:
         start_time = time.time()
         
-        img = get_frame_old(picam2)
+        img = get_frame(picam2)
 
         #grey = get_frame(picam2)
 

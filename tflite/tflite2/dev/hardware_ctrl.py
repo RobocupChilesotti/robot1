@@ -5,9 +5,9 @@ from initialize_tf import width
 from utils import map_int_from_zero, map_for_motors
 
 
-v_stall = 40
+v_stall = 80
 v_min = v_stall
-v_set = 60
+v_set = 90
 
 delta_v = v_set - v_min
 

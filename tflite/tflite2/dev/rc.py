@@ -127,7 +127,6 @@ def motors_test():
 
         if not balls:
             stop()
-            print('no balls')
         else:
             max_delta = 0
             max_index = 0

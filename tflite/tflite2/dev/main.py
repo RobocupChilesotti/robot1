@@ -6,6 +6,7 @@ import time
 from picamera2 import Picamera2
 import cv2
 import tensorflow as tf
+from vcgencmd import Vcgencmd
 
 
 #from acquire_img import initialize_stream, get_img
@@ -31,6 +32,7 @@ no_near_ball_count_thresh = 5
 
 turn_speed = 100
 
+vcgm = Vcgencmd()
 
 # (object_name, score, y_min, x_min, y_max, x_max)
 # Outputs balls 2d list where only elements with confidence > conf_thresh are present
@@ -79,9 +81,7 @@ def inf(frame):
 
 # (object_name, score, y_min, x_min, y_max, x_max)
 def find_ball():
-    balls_2d = []
-
-    while not balls_2d:
+    while True:
         start_time = time.time()
         
         # Get the frame
@@ -90,6 +90,10 @@ def find_ball():
         # Search for balls
         balls_2d = inf(frame)
         print('inf')
+
+        # Exits the loop when ball(s) found
+        if balls_2d:
+            break
 
         if display:
             for ball in balls_2d:
@@ -100,13 +104,19 @@ def find_ball():
             cv2.imshow('Frame', frame)
             cv2.waitKey(1)
 
-        # Start turning as if x_pos was 290 px
-        ms_speed(320)
+        count_time = time.time()
+
+        # Spins for 1s
+        while (start_time - count_time) < .3:
+            count_time = time.time()
+
+            # Start turning as if x_pos was 250 px
+            ms_speed(250)
+        
+        stop()
             
         end_time = time.time()
         print(f'fps = {1 / (end_time - start_time)}')
-
-    stop()
 
 
     max_delta = 0
