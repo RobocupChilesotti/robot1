@@ -5,7 +5,7 @@ from initialize_tf import width
 from utils import map_int_from_zero, map_for_motors
 
 
-v_stall = 60
+v_stall = 75
 v_min = v_stall
 v_set = 90
 
@@ -44,7 +44,6 @@ def turn_x_deg(turn_deg, direction, speed):
 
         ser.write(string.encode('utf-8'))		#Motor:FRight:FLeft:BLeft:BRight
         line = ser.readline().decode('utf-8').rstrip()
-        print(line)
         time.sleep(1)
         string = "M:255:255:255:255\n" 
         ser.write(string.encode('utf-8'))		#Motor:FRight:FLeft:BLeft:BRight
@@ -77,8 +76,9 @@ def ms_speed(x_pos):
 
 
     # Motor:FRight:FLeft:BLeft:BRight
-    ser.write(f'M:{front_right}:{front_left}:{back_left}:{back_right}\n'.encode('utf-8'))
-    print(f'M:{front_right}:{front_left}:{back_left}:{back_right}\n')
+    ser.write(
+        f'M:{front_right}:{front_left}:{back_left}:{back_right}\n'.encode(
+            'utf-8'))
 
     return False
     

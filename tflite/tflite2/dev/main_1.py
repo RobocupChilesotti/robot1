@@ -8,13 +8,15 @@ from vcgencmd import Vcgencmd
 
 
 from initialize_tf import labels, interpreter, input_details, output_details, height, width
-from utils import draw_bbox, find_biggest
+from utils import draw_bbox, find_biggest, get_nearest_center
 from aquire_stream_1_0 import get_frame
 from hardware_ctrl import ms_speed, stop, read_in
 
 
 # Global vars
 conf_thresh = 0.65
+
+align_straight_abs_range = 48
 
 display = True
 
@@ -61,7 +63,7 @@ def inf(frame):
     return balls
 
 
-def get_ball():
+def get_widest_ball():
     start_fps = time.time()
 
     frame = get_frame()
@@ -76,8 +78,14 @@ def get_ball():
                 ball_type, score, y_min, x_min, y_max, x_max = ball
                 draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
 
+            ball_type, score, y_min, x_min, y_max, x_max = find_biggest(balls)
+
+            draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max,
+                      color=(0, 255, 0), display_center=True)
+
             cv2.imshow('Frame', frame)
             cv2.waitKey(1)
+            
 
         stop_fps = time.time()
         print(f'fps = {1 / (stop_fps - start_fps)}')
@@ -97,11 +105,65 @@ def get_ball():
         return False
 
 
+def get_nearest_ball(prev_cx, prev_cy):
+    start_fps = time.time()
+
+    frame = get_frame()
+
+    balls = inf(frame)
+
+    if balls:
+        if display:
+            cx, cy = get_nearest_center(prev_cx, prev_cy, balls)
+
+            for ball in balls:
+                ball_type, score, y_min, x_min, y_max, x_max = ball
+
+                draw_bbox(frame, ball_type, score, y_min, x_min, y_max, x_max)
+                
+                
+                # Highlights the tracked ball
+                if ((x_max + x_min) / 2) == cx and ((y_max + y_min) / 2) == cy:
+                    draw_bbox(frame, ball_type, score, y_min, x_min, y_max,
+                              x_max, color=(0, 255, 0), display_center=True)
+                
+    
+            cv2.imshow('Frame', frame)
+            cv2.waitKey(1)
+
+        stop_fps = time.time()
+        print(f'fps = {1 / (stop_fps - start_fps)}')
+
+        return get_nearest_center(prev_cx, prev_cy, balls)
+
+    
+    else:
+        if display:
+            cv2.imshow('Frame', frame)
+             
+
+            cv2.waitKey(1)
+
+
+        # TO-DO: No ball detected scenario!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
+        
+        
+        return False
+
+
 def find_balls():
-    ball = get_ball()
-    if ball:
-        print('Found ball(s)')
-        return ball
+    ball = get_widest_ball()
+
+    cur_time = time.time()
+    start_turn = cur_time
+
+    while (cur_time - start_turn) < 1:
+        cur_time = time.time()
+
+        if ball:
+            print('Found ball(s)')
+            return ball
 
     print('Ball not found')
 
@@ -109,10 +171,10 @@ def find_balls():
     cur_time = start_turn
     while True:
         # Turn clockwise for .5s
-        while (cur_time - start_turn) < .5:
+        while (cur_time - start_turn) < .25:
             ms_speed(250)
 
-            ball = get_ball()
+            ball = get_widest_ball()
             if ball:
                 return ball
         
@@ -123,7 +185,7 @@ def find_balls():
         stop()
 
         while (cur_time - start_stop) < 2:
-            ball = get_ball()
+            ball = get_widest_ball()
             if ball:
                 return ball
         
@@ -131,5 +193,56 @@ def find_balls():
             start_turn = cur_time
 
 
+def initial_alignment(ball):
+    ball_type, score, y_min, x_min, y_max, x_max = ball
+
+    # Calculate Xcenter_point and Ycenter_point
+    cx = (x_max + x_min) / 2
+    cy = (y_max + y_min) / 2
+
+    while True:
+        # ALIGN WITH THE BALL
+
+        # Check whether to turn right or left
+        if cx < ((width - align_straight_abs_range) / 2):
+            # Ball on the left, TURN LEFT
+            ms_speed(30)
+
+            #print('ms_speed(30)')
+        elif cx > ((width + align_straight_abs_range) / 2):
+            # Ball on the left, TURN LEFT
+            ms_speed(290)
+
+            #print('ms_speed(290)')
+        else:
+            # Ball already aligned, GO STRAIGHT
+            stop()
+
+            #print('return ball')
+            return ball
+        
+        try:
+            cx, cy = get_nearest_ball(cx, cy)
+        except TypeError:
+            # No ball detected
+
+            # Implement no ball procedure!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            
+            
+            # If no ball found skip frame and wait for the next frame with
+            # balls. If new ball is too far, then it is not the correct one.
+
+
+            continue
+
+
+def get_to_ball(ball):
+    initial_alignment(ball)
+
+
 if __name__ == '__main__':
     ball = find_balls()
+
+    print('Exited find_balls()')
+
+    initial_alignment(ball)

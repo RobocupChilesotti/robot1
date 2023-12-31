@@ -16,6 +16,7 @@ cv2.startWindowThread()
 picam2 = Picamera2()
 picam2.set_controls({"AwbEnable": True})
 picam2.set_controls({"AwbMode": controls.AwbModeEnum.Cloudy})
+#picam2.set_controls({"FrameRate": 1.0})
 config = picam2.create_preview_configuration(main={"size": (width, height)},
                                                 lores={"size": lowresSize, "format": "YUV420"})
 # config["transform"] = libcamera.Transform(hflip=1, vflip=1)
