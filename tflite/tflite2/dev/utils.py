@@ -82,8 +82,7 @@ def find_biggest(balls):
 
 def get_nearest_center(prev_cx, prev_cy, balls):
     min_delta = frame_diagonal
-    nearest_cx = 0
-    nearest_cy = 0
+    nearest_ball = ()
 
     for ball in balls:
         # object_name, score, y_min, x_min, y_max, x_max = ball
@@ -95,7 +94,16 @@ def get_nearest_center(prev_cx, prev_cy, balls):
 
         if delta < min_delta:
             min_delta = delta
-            nearest_cx = cx
-            nearest_cy = cy
+            nearest_ball = ball
 
-    return nearest_cx, nearest_cy
+    return nearest_ball
+
+
+def unpack_center(ball):
+    # ball_type, score, y_min, x_min, y_max, x_max = ball
+
+    # Calculate Xcenter_point and Ycenter_point
+    cx = (ball[5] + ball[3]) / 2
+    cy = (ball[4] + ball[2]) / 2
+
+    return cx, cy

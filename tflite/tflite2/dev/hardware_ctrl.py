@@ -97,3 +97,16 @@ def stop():
     ser.write("M:0:0:0:0\n".encode('utf-8'))
 
     return False
+
+
+if __name__ == '__main__':
+    start = time.time()
+    cur = start
+    while (cur - start) < 10:
+        cur = time.time()
+    ms_speed(320)
+    start = time.time()
+    cur = start
+    while (cur - start) < 10:
+        cur = time.time()
+    stop()
