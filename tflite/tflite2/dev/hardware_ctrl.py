@@ -5,6 +5,9 @@ from initialize_tf import width
 from utils import map_int_from_zero, map_for_motors
 
 
+# Global variables
+
+# DC motors
 v_stall = 75
 v_min = v_stall
 v_set = 90
@@ -12,6 +15,8 @@ v_set = 90
 delta_v = v_set - v_min
 
 conv = delta_v / (width / 4)
+
+# Servo motors
 
 
 
@@ -28,33 +33,6 @@ logging.info("Serial communication started")
 def read_in():
     line = ser.readline().decode('utf-8').rstrip()
     print(f'IN from Arduino: {line}')
-
-
-# NO-MULTITHREADING!
-def turn_x_deg(turn_deg, direction, speed):
-    # 0 <= speed <= 255
-    # Robot turns 'turn_deg' degrees on the center axis in the 'direction' direction
-    # 'direction' can either be r (right) or l (left)
-    start_time = time.time()
-    end_time = time.time()
-
-
-    while (start_time - end_time) >= turn_deg:
-        string = "M:255:255:255:255\n" 
-
-        ser.write(string.encode('utf-8'))		#Motor:FRight:FLeft:BLeft:BRight
-        line = ser.readline().decode('utf-8').rstrip()
-        time.sleep(1)
-        string = "M:255:255:255:255\n" 
-        ser.write(string.encode('utf-8'))		#Motor:FRight:FLeft:BLeft:BRight
-        
-        time.sleep(1)
-
-        end_time = time.time()
-
-    # Return flag 'done' when action completed
-
-    return True
 
 
 def ms_speed(x_pos):
@@ -83,20 +61,24 @@ def ms_speed(x_pos):
     return False
     
 
-
-def set_turn(direction, speed):
-    # Starts to turn on center axis in the given direction at the given speed
-    # 'direction' can either be r (right) or l (left)
-
-    return False
-
-
 def stop():
     # Stop motors
-    #Motor:FRight:FLeft:BLeft:BRight
+    # Motor:FRight:FLeft:BLeft:BRight
     ser.write("M:0:0:0:0\n".encode('utf-8'))
 
     return False
+
+
+def servo_control(left_basket, right_basket, gripper_tilt, gripper_open):
+    # Servo:BLeft:BRight:TiltGripper:CloseGripper
+    
+    ser.write(f"M:{left_basket}:{right_basket}:{gripper_tilt}:{gripper_open}\n".encode('utf-8'))
+
+
+def servo_home():
+    # Servo:BLeft:BRight:TiltGripper:CloseGripper
+    
+    ser.write(f"M:0:0:0:0\n".encode('utf-8'))
 
 
 if __name__ == '__main__':
