@@ -2,7 +2,10 @@ import cv2
 from libcamera import controls
 import time
 from picamera2 import Picamera2
-from initialize_tf import height, width
+
+
+width = 320
+height = 320
 
 
 normalSize = (640, 480)
@@ -44,7 +47,7 @@ def erase_background(frame):
 def get_frame():
     frame = cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
     
-    frame = erase_background(frame)
+    #frame = erase_background(frame)
     
     return frame[:,:320]
 

@@ -80,6 +80,22 @@ def find_biggest(balls):
     return balls[max_index]
 
 
+def find_lowest(balls):
+    max_depth = 0
+    max_index = 0
+
+    for index, ball in enumerate(balls):
+        # (object_name, score, y_min, x_min, y_max, x_max)
+        
+        cy = (ball[4] + ball[2]) / 2
+
+        if cy > max_depth:
+            max_depth = cy
+            max_index = index
+
+    return balls[max_index]
+
+
 def get_nearest_center(prev_cx, prev_cy, balls):
     min_delta = frame_diagonal
     nearest_ball = ()

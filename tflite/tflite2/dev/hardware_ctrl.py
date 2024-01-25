@@ -8,9 +8,9 @@ from utils import map_int_from_zero, map_for_motors
 # Global variables
 
 # DC motors
-v_stall = 75
+v_stall = 70
 v_min = v_stall
-v_set = 90
+v_set = 70
 
 delta_v = v_set - v_min
 
@@ -35,10 +35,14 @@ def read_in():
     print(f'IN from Arduino: {line}')
 
 
-def ms_speed(x_pos):
+def ms_speed(x_pos, speed=v_set):
     # 0 <= x_pos >= width(320)
 
-    front_left, front_right, back_left, back_right = map_for_motors(x_pos, width, conv, v_min, v_set)
+    if speed < v_min:
+        speed = v_min
+
+    front_left, front_right, back_left, back_right = map_for_motors(x_pos,
+                                                    width, conv, v_min, speed)
 
     if abs(front_left) < v_stall:
         front_left = 0
@@ -72,16 +76,17 @@ def stop():
 def servo_control(left_basket, right_basket, gripper_tilt, gripper_open):
     # Servo:BLeft:BRight:TiltGripper:CloseGripper
     
-    ser.write(f"M:{left_basket}:{right_basket}:{gripper_tilt}:{gripper_open}\n".encode('utf-8'))
+    ser.write(f"S:{left_basket}:{right_basket}:{gripper_tilt}:{gripper_open}\n".encode('utf-8'))
 
 
 def servo_home():
     # Servo:BLeft:BRight:TiltGripper:CloseGripper
     
-    ser.write(f"M:0:0:0:0\n".encode('utf-8'))
+    ser.write(f"S:0:0:0:0\n".encode('utf-8'))
 
 
 if __name__ == '__main__':
+    '''
     start = time.time()
     cur = start
     while (cur - start) < 10:
@@ -92,3 +97,7 @@ if __name__ == '__main__':
     while (cur - start) < 10:
         cur = time.time()
     stop()
+    '''
+
+    servo_control(90, 20, 20, 20)
+    read_in()

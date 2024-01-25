@@ -150,7 +150,7 @@ def motors_test():
 
             ms_speed(x_pos)
         
-        read_in()
+        #read_in()
 
         cv2.imshow('Frame', frame)
         cv2.waitKey(1)
