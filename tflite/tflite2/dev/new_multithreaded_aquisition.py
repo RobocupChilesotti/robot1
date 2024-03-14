@@ -1,3 +1,4 @@
+import threading
 import cv2
 from libcamera import controls
 import time
@@ -25,26 +26,62 @@ picam2.configure(config)
 picam2.start()
 
 
-def get_wall_height(frame):
-    return 170
+global frame
+frame = cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
 
 
-def erase_background(frame):
-    # Define the RGB color you want to use
-    color = (255, 0, 0)  # Red color
+def foto():
+    while True:
+        frame = cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
+        
+        # Define the RGB color you want to use
+        color = (255, 0, 0)  # Red color
 
-    wall_height = get_wall_height(frame)
+        wall_height = 170
 
-    # Fill the upper half of the image with the defined color
-    frame[0:height - wall_height, :] = color
+        # Fill the upper half of the image with the defined color
+        frame[0:height - wall_height, :] = color
+        
+        frame = frame[:,:320]
 
-    return frame
+# Create a Thread object.
+thread = threading.Thread(target=foto)
 
+# Start the thread.
+thread.start()
+
+
+if __name__ == '__main__':
+    # Print the result.
+    while True:
+        cv2.imshow('frame', frame)
+        cv2.waitKey(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 
 def get_frame():
     frame = cv2.cvtColor(picam2.capture_array("lores"), cv2.COLOR_YUV420p2RGB)
     
-    #frame = erase_background(frame)
+    # Define the RGB color you want to use
+    color = (255, 0, 0)  # Red color
+
+    wall_height = 170
+
+    # Fill the upper half of the image with the defined color
+    frame[0:height - wall_height, :] = color
     
     return frame[:,:320]
 
@@ -65,3 +102,6 @@ if __name__ == '__main__':
         end_time = time.time()
      
         print(1 / (end_time - start_time))
+
+        
+'''

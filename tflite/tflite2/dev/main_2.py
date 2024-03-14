@@ -11,12 +11,13 @@ from initialize_tf import labels, interpreter, input_details, output_details, he
 from utils import draw_bbox, find_biggest, get_nearest_center, unpack_center, find_lowest
 from aquire_stream_1_0 import get_frame
 from hardware_ctrl import ms_speed, stop, read_in
+from colors_utils import isolate_green, isolate_red
 
 
 # Global vars
 conf_thresh = 0.65
 
-align_straight_abs_range = 20
+align_straight_abs_range = 40
 
 left_alignment_limit = (width - align_straight_abs_range) // 2
 right_alignment_limit = (width + align_straight_abs_range) // 2
@@ -142,7 +143,11 @@ def find_balls():
 
     start_turn = time.time()
     cur_time = start_turn
+
+    ms_speed(320, speed=30)
+
     while True:
+        '''
         # Turn clockwise for .5s
         while (cur_time - start_turn) < .25:
             ms_speed(241)
@@ -166,6 +171,10 @@ def find_balls():
         
             cur_time = time.time()
             start_turn = cur_time
+        '''
+        ball = get_lowest_ball()
+        if ball:
+            return ball
 # End find_balls()
             
 
@@ -226,42 +235,55 @@ def initial_alignment_error_procedure():
 
 
 def initial_alignment(ball):
+    stop()
+
     print('Entered initial_alignment()')
+
     # Get Xcenter_point and Ycenter_point
     cx, cy = unpack_center(ball)
 
-    while True:
-        try:
-            # ALIGN WITH THE BALL
+    try:
+        # ALIGN WITH THE BALL
 
-            # Get Xcenter_point and Ycenter_point
-            cx, cy = unpack_center(ball)
+        # Check whether to turn right or left
+        
+        # Ball on the left, TURN LEFT
+        if cx < left_alignment_limit:
+            ms_speed(81)
+            print('ms_speed(70)')
 
-            # Check whether to turn right or left
-            if cx < left_alignment_limit:
-                # Ball on the left, TURN LEFT
-                #ms_speed(79)
+            while cx < left_alignment_limit:
+                ball = get_next_ball(cx, cy, left_alignment_limit,
+                            right_alignment_limit)
+                
+                # Get Xcenter_point and Ycenter_point
+                cx, cy = unpack_center(ball)
 
-                print('ms_speed(70)')
-            elif cx > right_alignment_limit:
-                # Ball on the left, TURN LEFT
-                #ms_speed(241)
+            stop()
+            return ball
 
-                print('ms_speed(250)')
-            else:
-                # Ball already aligned, GO STRAIGHT
-                stop()
+        # Ball on the left, TURN LEFT
+        elif cx > right_alignment_limit:
+            ms_speed(239)
+            print('ms_speed(250)')
+            while cx > right_alignment_limit:
+                ball = get_next_ball(cx, cy, left_alignment_limit,
+                            right_alignment_limit)
+                
+                # Get Xcenter_point and Ycenter_point
+                cx, cy = unpack_center(ball)
 
-                #print('return ball')
-                return ball
-            
-            ball = get_next_ball(cx, cy, left_alignment_limit,
-                                 right_alignment_limit)
+            stop()
+            return ball 
 
-        except TypeError:
-            # No ball detected
+        else:
+            return ball       
 
-            initial_alignment_error_procedure()
+
+    except TypeError:
+        # No ball detected
+
+        initial_alignment_error_procedure()
 # End initial_alignment()
 
 
@@ -334,9 +356,13 @@ def final_alignment(ball):
 def main():
     ball = find_balls()
 
+    print('Exited find_balls()')
+
     cv2.waitKey(0)
 
     ball = initial_alignment(ball)
+
+    cv2.waitKey(0)
 
     get_to_ball(ball)
 

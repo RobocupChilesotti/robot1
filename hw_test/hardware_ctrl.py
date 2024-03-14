@@ -1,16 +1,19 @@
 import logging
 import serial
 import time
-from initialize_tf import width
+#from initialize_tf import width
 from utils import map_int_from_zero, map_for_motors
+
+
+width = 64
 
 
 # Global variables
 
 # DC motors
-v_stall = 40
+v_stall = 70
 v_min = v_stall
-v_set = 50
+v_set = 70
 
 delta_v = v_set - v_min
 
@@ -24,7 +27,6 @@ conv = delta_v / (width / 4)
 
 
 ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
-#ser = serial.Serial('/dev/ttyAMA10', 115200, timeout=1)
 time.sleep(3)
 ser.reset_input_buffer()
 
@@ -54,16 +56,13 @@ def ms_speed(x_pos, speed=v_set):
     if abs(back_left) < v_stall:
         back_left = 0
 
-    if abs(back_right) < v_stall:
+    if abs(back_left) < v_stall:
         back_left = 0
 
 
-    print(f"M:FR{front_right}:FL{front_left}:BL{back_left}:BR{back_right}\n".encode(
-            'utf-8'))
-
     # Motor:FRight:FLeft:BLeft:BRight
     ser.write(
-        f"M:{front_right}:{front_left}:{back_left}:{back_right}\n".encode(
+        f'M:{front_right}:{front_left}:{back_left}:{back_right}\n'.encode(
             'utf-8'))
 
     return False
@@ -77,16 +76,31 @@ def stop():
     return False
 
 
-def servo_control(left_basket, right_basket, gripper_tilt, gripper_open):
+def servo_control(baskets, cam_tilt, gripper_tilt, gripper_open):
     # Servo:BLeft:BRight:TiltGripper:CloseGripper
-
-    ser.write(f"S:{left_basket}:{right_basket}:{gripper_tilt}:{gripper_open}\n".encode('utf-8'))
+    
+    ser.write(f"S:{baskets}:{cam_tilt}:{gripper_tilt}:{gripper_open}\n".encode('utf-8'))
 
 
 def servo_home():
     # Servo:BLeft:BRight:TiltGripper:CloseGripper
-
+    
     ser.write(f"S:0:0:0:0\n".encode('utf-8'))
+
+
+def read_sensor():
+    line = ser.readline().decode('utf-8').rstrip()
+    
+    # Split the string by ':'
+    parts = line.split(':')
+
+    # Store the values in separate variables
+    bno = int(parts[1])
+    mini_l = int(parts[2])
+    mini_c = int(parts[3])
+    mini_r = int(parts[4])
+
+    return bno, mini_l, mini_c, mini_r
 
 
 if __name__ == '__main__':
@@ -102,17 +116,6 @@ if __name__ == '__main__':
         cur = time.time()
     stop()
     '''
-    '''
-    ms_speed(320, 50)
-    while True:
-        read_in()
-    '''
 
-    # Motor:FRight:FLeft:BLeft:BRight
-    ser.write(f"M:{510}:{510}:{510}:{510}\n".encode('utf-8'))
-
-    print('sent')
-    '''
-    while True:
-        read_in()
-    '''
+    servo_home()
+    read_in()
